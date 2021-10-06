@@ -1,193 +1,275 @@
 openapi: 3.1.0
 info:
   title: mailinglijst
-  version: '1.0'
+  version: '3.0'
+  contact:
+    name: Erick de Boer
+    url: 'http://www.em-cultuur.nl'
+    email: e.deboer@em-cultuur.nl
+  summary: 'Accessing MailingLijst.nl database '
+  description: 'This API-definitions sets the new standard description/development methods for EM-Cultuur. Starting with a "simple",  existing API for MailingLijst.nl'
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'https://develop.adrez.cloud/mailinglijst'
+    description: develop
+tags:
+  - name: Contacts
 paths:
-  '/users/{userId}':
+  '/contacts/{addressId}':
     parameters:
       - schema:
           type: integer
-        name: userId
+        name: addressId
         in: path
         required: true
-        description: Id of an existing user.
+        description: Id of an existing contact.
     get:
-      summary: Get User Info by User ID
+      summary: Get contact by addressId
       tags: []
       responses:
         '200':
-          description: User Found
+          description: Contrafct Found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Get User Alice Smith:
-                  value:
-                    id: 142
-                    firstName: Alice
-                    lastName: Smith
-                    email: alice.smith@gmail.com
-                    dateOfBirth: '1997-10-31'
-                    emailVerified: true
-                    signUpDate: '2019-08-24'
+                $ref: '#/components/schemas/Contact'
         '404':
-          description: User Not Found
-      operationId: get-users-userId
+          description: Contact Not Found
+      operationId: get-contact-addressId
       description: Retrieve the information of the user with the matching user ID.
-    patch:
-      summary: Update User Information
-      operationId: patch-users-userId
-      responses:
-        '200':
-          description: User Updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Updated User Rebecca Baker:
-                  value:
-                    id: 13
-                    firstName: Rebecca
-                    lastName: Baker
-                    email: rebecca@gmail.com
-                    dateOfBirth: '1985-10-02'
-                    emailVerified: false
-                    createDate: '2019-08-24'
-        '404':
-          description: User Not Found
-        '409':
-          description: Email Already Taken
-      description: Update the information of an existing user.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                  description: 'If a new email is given, the user''s email verified property will be set to false.'
-                dateOfBirth:
-                  type: string
-            examples:
-              Update First Name:
-                value:
-                  firstName: Rebecca
-              Update Email:
-                value:
-                  email: rebecca@gmail.com
-              Update Last Name & Date of Birth:
-                value:
-                  lastName: Baker
-                  dateOfBirth: '1985-10-02'
-        description: Patch user properties to update.
-  /user:
-    post:
-      summary: Create New User
-      operationId: post-user
-      responses:
-        '200':
-          description: User Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                New User Bob Fellow:
-                  value:
-                    id: 12
-                    firstName: Bob
-                    lastName: Fellow
-                    email: bob.fellow@gmail.com
-                    dateOfBirth: '1996-08-24'
-                    emailVerified: false
-                    createDate: '2020-11-18'
-        '400':
-          description: Missing Required Information
-        '409':
-          description: Email Already Taken
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                dateOfBirth:
-                  type: string
-                  format: date
-              required:
-                - firstName
-                - lastName
-                - email
-                - dateOfBirth
-            examples:
-              Create User Bob Fellow:
-                value:
-                  firstName: Bob
-                  lastName: Fellow
-                  email: bob.fellow@gmail.com
-                  dateOfBirth: '1996-08-24'
-        description: Post the necessary fields for the API to create a new user.
-      description: Create a new user.
-  /:
+  '/contacts':
     get:
-      summary: Hello
-      tags: []
-      responses: {}
-      operationId: get
+      description: get a list of contacts
+      tags:
+        - Contacts
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up
+          required: false
+          schema:
+            type: string
+          allowEmptyValue: true
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            example: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+            default: 25
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+      operationId: getContacts
 components:
   schemas:
-    User:
-      title: User
-      type: object
+    Contact:
       description: ''
-      examples:
-        - id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
+      type: object
       properties:
-        id:
-          type: integer
-          description: Unique identifier for the given user.
+        addressId:
+          type: number
+        addressGuid:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        organisation:
+          type: string
+          minLength: 1
+        street:
+          type: string
+          minLength: 1
+        number:
+          type: string
+          minLength: 1
+        zipcode:
+          type: string
+          minLength: 1
+        city:
+          type: string
+          minLength: 1
+        countryId:
+          type: number
+        countryName:
+          type: string
+          minLength: 1
         firstName:
+          type: string
+          minLength: 1
+        namePrefix:
           type: string
         lastName:
           type: string
-        email:
+          minLength: 1
+        genderId:
+          type: number
+        genderName:
           type: string
-          format: email
-        dateOfBirth:
+          minLength: 1
+        phone:
           type: string
-          format: date
-          example: '1997-10-31'
-        emailVerified:
-          type: boolean
-          description: Set to true if the user's email has been verified.
-        createDate:
+          minLength: 1
+        mobile:
           type: string
-          format: date
-          description: The date that the user was created.
+        syncId:
+          type: string
+          minLength: 1
+        subscriptions:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            required:
+              - listId
+              - listName
+              - subscribeDate
+              - optinDate
+              - optin
+            properties:
+              listId:
+                type: number
+              listName:
+                type: string
+                minLength: 1
+              subscribeDate:
+                type: string
+                minLength: 1
+              optinDate:
+                type: string
+                minLength: 1
+              optin:
+                type: boolean
+        listCodes:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            required:
+              - listId
+              - listCodeId
+              - name
+              - typeId
+              - fieldTypeId
+            properties:
+              listId:
+                type: number
+              listCodeId:
+                type: number
+              name:
+                type: string
+                minLength: 1
+              typeId:
+                type: number
+              value: {}
+              fieldTypeId:
+                type: number
       required:
-        - id
-        - firstName
-        - lastName
+        - addressId
+        - addressGuid
         - email
-        - emailVerified
+        - organisation
+        - street
+        - number
+        - zipcode
+        - city
+        - countryId
+        - countryName
+        - firstName
+        - namePrefix
+        - lastName
+        - genderId
+        - genderName
+        - phone
+        - mobile
+        - syncId
+        - subscriptions
+        - listCodes
+      x-examples:
+        example-1:
+          addressId: 12345
+          addressGuid: AD20__12345
+          email: support@em-cultuur.nl
+          organisation: EM-Cultuur
+          street: Damrak
+          number: 68A
+          zipcode: 1012 LM
+          city: Amsterdam
+          countryId: 500
+          countryName: Nederland
+          firstName: Support
+          namePrefix: ''
+          lastName: Cultuur
+          genderId: 102
+          genderName: Man
+          phone: 020-4626000
+          mobile: ''
+          syncId: '336283'
+          subscriptions:
+            - listId: 103922
+              listName: EM-Cultuur SectorFlits
+              subscribeDate: '2013-11-29T21:17:18.470Z'
+              optinDate: '2013-11-29T21:17:18.470Z'
+              optin: true
+          listCodes:
+            - listId: 105488
+              listCodeId: 154697
+              name: SectorFlits
+              typeId: 1000
+              value: null
+              fieldTypeId: 0
+      examples:
+        - addressId: 12345
+          addressGuid: AD20__12345
+          email: support@em-cultuur.nl
+          organisation: EM-Cultuur
+          street: Damrak
+          number: 68A
+          zipcode: 1012 LM
+          city: Amsterdam
+          countryId: 500
+          countryName: Nederland
+          firstName: Support
+          namePrefix: ''
+          lastName: Cultuur
+          genderId: 102
+          genderName: Man
+          phone: 020-4626000
+          mobile: ''
+          syncId: '336283'
+          subscriptions:
+            - listId: 103922
+              listName: EM-Cultuur SectorFlits
+              subscribeDate: '2013-11-29T21:17:18.470Z'
+              optinDate: '2013-11-29T21:17:18.470Z'
+              optin: true
+          listCodes:
+            - listId: 105488
+              listCodeId: 154697
+              name: SectorFlits
+              typeId: 1000
+              value: null
+              fieldTypeId: 0
+  securitySchemes:
+    Authorization:
+      name: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtbF9uYW1lIjoiREVWRUxPUCIsIm1sX2tleSI6IjQ3OTc3MmU3LTNiZGMtNGRkMS1hMzkzLTg0ZTg2OWM1YTllOCIsIm1sX21lbWJlciI6IjE1MDkxIiwibWxfYWNjb3VudCI6IjAiLCJpYXQiOjE2MzMzNzc1NDUsImV4cCI6MzIxMTI1NzU0NX0.pUSgAesYE9Osb5KCgfMSR0mOy4At9GlZZLduQbnlwzY
+      type: apiKey
+      in: header
+      description: key contains MailingLijst-MEMBER_ID
+security:
+  - Authorization: []

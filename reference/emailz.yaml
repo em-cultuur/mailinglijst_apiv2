@@ -1,0 +1,1143 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://localhost:3000'
+info:
+  description: 'EmailZ Security API (users, teams, roles and permissions)'
+  version: 1.0.0
+  title: Setup for EmailAdreZ API
+  contact:
+    email: e.deboer@em-cultuur.nl
+    name: Erick de Boer
+    url: 'https://www.em-cultuur.nl'
+tags:
+  - name: license
+    description: license administrators
+  - name: admins
+    description: Secured Admin-only calls
+paths:
+  /accounts:
+    get:
+      description: get a list of available accounts
+      summary: search Accounts
+      tags:
+        - admins
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up
+          required: false
+          schema:
+            type: string
+          allowEmptyValue: true
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            example: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+            default: 25
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+      operationId: getAccounts
+  /account:
+    post:
+      summary: Create New Account
+      operationId: createAccount
+      description: Create a new Account.
+      tags:
+        - license
+      responses:
+        '200':
+          description: Account Created
+        '400':
+          description: Missing Required Information
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+  '/account/{accountId}':
+    parameters:
+      - name: accountId
+        schema:
+          type: integer
+          default: 12345
+        in: path
+        required: true
+    get:
+      summary: get a single account
+      operationId: getAccount
+      description: get account info and license
+      tags: []
+      responses:
+        '200':
+          description: Account exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Account Not Found
+    patch:
+      summary: Update account Information
+      operationId: updateAccount
+      description: update account information/license settings
+      tags:
+        - license
+      responses:
+        '200':
+          description: Account Updated
+        '404':
+          description: Account Not Found
+    delete:
+      summary: delete account and license
+      operationId: deleteAccount
+      description: >-
+        delete an account, including license info. All related data wil be
+        deleted.
+      tags:
+        - license
+      responses:
+        '200':
+          description: You cannot delete accounts (yet)
+  /teams:
+    get:
+      tags: []
+      summary: search Teams
+      operationId: searchTeams
+      description: get a list of available Teams
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+      responses:
+        '200':
+          description: Ok
+  /team:
+    post:
+      summary: Create New Team
+      operationId: createTeam
+      description: Create a new team. Number of teams is restricted by the account license
+      tags:
+        - admins
+      responses:
+        '200':
+          description: Team Created
+        '400':
+          description: Missing Required Information
+        '409':
+          description: Team already exists
+  '/team/{teamId}':
+    parameters:
+      - name: teamId
+        schema:
+          type: integer
+        in: path
+        required: true
+        description: Id of an  team to process
+    get:
+      summary: Get team Info by teamId
+      operationId: getTeam
+      description: Retrieve the information of the team with the matching teamId
+      tags: []
+      responses:
+        '200':
+          description: Team exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Team Not Found
+    patch:
+      summary: Update Team Information
+      operationId: patchTeamTeamId
+      tags:
+        - admins
+      responses:
+        '200':
+          description: Team Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Team Not Found
+      description: Update the information of an existing team.
+    delete:
+      summary: Delete Team by team
+      tags:
+        - admins
+      responses:
+        '200':
+          description: Team Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Team Not Found
+      operationId: deleteTeamTeamId
+      description: Retrieve the information of the team with the matching teamId.
+  /permissions:
+    get:
+      summary: search Permissions
+      operationId: searchPermissions
+      description: 'By passing in the appropriate options, you can search for'
+      tags: []
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+        '400':
+          description: bad input parameter
+  /permission:
+    post:
+      summary: Create New Permission
+      operationId: createPermission
+      description: Post the necessary fields for the API to create a new Permission
+      tags:
+        - license
+      responses:
+        '200':
+          description: Permission Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+        '400':
+          description: Missing Required Information
+        '409':
+          description: permission Already Exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                guid:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - name
+                - guid
+  '/permission{permissionId}':
+    parameters:
+      - name: permissionId
+        schema:
+          type: integer
+        in: path
+        required: true
+        description: Id of an existing permission.
+    get:
+      summary: Get permission Details
+      operationId: getPermission
+      description: Retrieve the information of the permission.
+      tags: []
+      responses:
+        '200':
+          description: Permission not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+        '404':
+          description: Permission Not Found
+    patch:
+      summary: Update Permission Information
+      operationId: updatePermission
+      description: Update the information of an existing permission.
+      tags:
+        - license
+      responses:
+        '200':
+          description: Permission Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+              examples:
+                Updated Permission:
+                  value:
+                    permissionId: 13
+                    permissionName: Update Contacts
+                    guid: CONTUPD
+        '404':
+          description: Permission Not Found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                lastName:
+                  type: string
+            examples:
+              Update loginName:
+                value:
+                  loginName: ErickB
+              Update Email:
+                value:
+                  email: erick@em-cultuur.nl
+                  isActive: true
+        description: Patch user properties to update.
+    delete:
+      summary: Delete Permission
+      operationId: deletePermission
+      description: Delete permission also removes the permission from all roles
+      tags:
+        - license
+      responses:
+        '200':
+          description: Permission Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+        '404':
+          description: Permission Not Found
+  /users:
+    get:
+      summary: search Users
+      operationId: searchUsers
+      description: 'By passing in the appropriate options, you can search'
+      tags: []
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: bad input parameter
+  /user:
+    post:
+      summary: Create New User
+      operationId: addUser
+      description: Create a new user
+      tags:
+        - admins
+      responses:
+        '200':
+          description: User Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Missing Required Information
+        '409':
+          description: User Already Exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+              required:
+                - loginName
+                - email
+        description: Post the necessary fields for the API to create a new user.
+  '/user/{userId}':
+    parameters:
+      - schema:
+          type: integer
+        name: userId
+        in: path
+        required: true
+        description: Id of an existing user.
+    get:
+      summary: Get User Info by User ID
+      operationId: getUser
+      description: Retrieve the details of a user
+      tags: []
+      responses:
+        '200':
+          description: User Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                User Erick:
+                  value:
+                    userId: 142
+                    loginName: ErickdB
+                    userName: Erick de Boer
+                    email: e.deboer@em-cultuur.n
+                    isActive: true
+        '404':
+          description: User Not Found
+    patch:
+      summary: Update User Information
+      operationId: patch-users-userId
+      tags: []
+      responses:
+        '200':
+          description: User Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Updated User Erick:
+                  value:
+                    userId: 13
+                    loginName: ErickB
+                    email: rebecca@gmail.com
+                    emailVerified: false
+        '404':
+          description: User Not Found
+        '409':
+          description: Email Already Taken
+      description: Update the information of an existing user.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  description: >-
+                    If a new email is given, the user's email verified property
+                    will be set to false.
+                dateOfBirth:
+                  type: string
+            examples:
+              Update loginName:
+                value:
+                  loginName: ErickB
+              Update Email:
+                value:
+                  email: erick@em-cultuur.nl
+                  isActive: true
+        description: Patch user properties to update.
+    delete:
+      summary: Delete user by userId
+      tags:
+        - admins
+      responses:
+        '200':
+          description: User Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User Not Found
+      operationId: deleteUser
+      description: Retrieve the information of the user with the matching user ID.
+  /roles:
+    get:
+      summary: search Roles
+      operationId: searchRoles
+      description: get available roles
+      tags: []
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        '400':
+          description: bad input parameter
+  /role:
+    post:
+      summary: Create New Role
+      operationId: createRole
+      description: Create a new user.
+      tags:
+        - license
+      responses:
+        '200':
+          description: Role Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: Missing Required Information
+        '409':
+          description: Role Already Exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+              required:
+                - name
+                - email
+        description: Post the necessary fields for a new Role.
+  '/role{roleId}':
+    parameters:
+      - schema:
+          type: integer
+        name: roleId
+        in: path
+        required: true
+        description: Id of an existing Role.
+    get:
+      summary: Get role details
+      operationId: getRoleRoleId
+      description: Retrieve the information of the role
+      tags: []
+      responses:
+        '200':
+          description: Role Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Role Not Found
+    patch:
+      summary: Update Role Information
+      operationId: updateRoleRoleId
+      description: Update the information of an existing user.
+      tags:
+        - admins
+      responses:
+        '200':
+          description: Role Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+              examples:
+                Updated Role:
+                  value:
+                    roleId: 2
+                    roleName: Editor
+                    sortOn: E
+                    isArchive: false
+        '404':
+          description: Role Not Found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleId:
+                  type: integer
+                roleName:
+                  type: string
+                sortOn:
+                  type: string
+                isArchive:
+                  type: boolean
+            examples:
+              Update a Role:
+                value:
+                  roleName: Kijkers
+              isArchive:
+                value:
+                  email: false
+        description: Patch user properties to update.
+    delete:
+      summary: Delete role by roleId
+      operationId: deleteRole
+      description: Retrieve the information of the role by roleId
+      tags:
+        - admins
+      responses:
+        '200':
+          description: Role Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Role Not Found
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - userId
+        - loginName
+        - email
+      properties:
+        userId:
+          type: integer
+          description: Unique identifier for a user.
+          example: 12345
+        name:
+          type: string
+          description: Firstname/prefix/lastname
+          example: Erick de Boer
+        sortOn:
+          type: string
+          description: override sorting on alphabet
+          example: BOER
+        loginName:
+          type: string
+          description: generated unique userId for login
+          example: ErickdB
+        initials:
+          type: string
+          description: short version of name for reports
+          example: EDB
+        function:
+          type: string
+          description: function of the user within the organisation
+          example: Derickteur
+        description:
+          type: string
+          description: extra information about the user
+          example: must use better example
+        email:
+          type: string
+          format: email
+          example: e.deboer@em-cultuur.nl
+        emailVerified:
+          type: boolean
+          description: Set to true if the user's email has been verified.
+        password:
+          type: string
+          format: password
+          description: encrypted password
+        passwordExpiryDate:
+          type: string
+          format: date
+          description: The date the password needs to be changed
+        isActive:
+          type: boolean
+          description: 'Is an active user, to be counted in the license'
+          example: true
+        isBlocked:
+          type: boolean
+          description: user is blocked from loging in (too many login attempts)
+        blockExpiryDate:
+          type: string
+          format: date
+          description: The date the block is lifted (when isBlocked = true)
+        isArchive:
+          type: boolean
+          description: >-
+            user is out of sight, not counted in the license and isActive must
+            be true
+        is2fa:
+          type: boolean
+          description: user must login in with multi-factor-authentication
+        externalId:
+          type: string
+          description: external Id for synchronising users with external sources
+        userRoles:
+          description: array of assigend Roles
+          type: array
+          items:
+            type: object
+            properties:
+              roleId:
+                type: integer
+                example: 1
+              roleName:
+                type: string
+                example: viewer
+        userTeams:
+          type: array
+          description: 'array of assigned teams [All, Sales] (minimum of 1 is required)'
+          items:
+            type: object
+            properties:
+              teamId:
+                type: integer
+                example: 1
+              teamName:
+                type: string
+                example: sales
+        IPranges:
+          description: IP-ranges allowed/restricted fot this user
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - ALLOW
+                  - DENY
+                example: ALLOW
+              wildcard:
+                type: string
+                example: 94.168.36.42
+              startDate:
+                type: string
+                format: date
+                example: '2019-08-24'
+              endDate:
+                type: string
+                format: date
+                example: '2099-08-24'
+              isActive:
+                type: boolean
+              purpose:
+                type: string
+                example: damrak.em-cultuur.nl
+        creationDate:
+          type: string
+          format: date-time
+          description: The date that the user was created.
+        modifiedDate:
+          type: string
+          format: date-time
+          description: The date that the user was updated.
+    Team:
+      title: Team
+      type: object
+      description: A single team can be assigned users and roles
+      properties:
+        teamId:
+          type: integer
+          description: Unique identifier for team
+        teamName:
+          type: string
+          description: Teamname unique for account
+          example: The salesteam
+        sortOn:
+          type: string
+          description: override sorting on alphabet
+          example: SAL
+        viewers:
+          description: array of teams that are allowed to VIEW this teams content.
+          items:
+            type: object
+            properties:
+              teamId:
+                type: integer
+              teamName:
+                type: string
+        IPranges:
+          description: IP-ranges allowed/restricted for this team
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - ALLOW
+                  - DENY
+                example: ALLOW
+              wildcard:
+                type: string
+                example: 94.168.36.42
+              startDate:
+                type: string
+                format: date
+                example: '2019-08-24'
+              endDate:
+                type: string
+                format: date
+                example: '2099-08-24'
+              isActive:
+                type: boolean
+              purpose:
+                type: string
+                example: damrak.em-cultuur.nl
+        isActive:
+          type: boolean
+          description: 'Is the team in use, does it count for the license'
+        isArchive:
+          type: boolean
+          description: Should the team be visible
+        creationDate:
+          type: string
+          format: date-time
+          description: The date that the team was created.
+        modifiedDate:
+          type: string
+          format: date-time
+          description: The date that the team was updated.
+      required:
+        - teamId
+        - teamName
+    Permission:
+      title: Permission
+      description: Permissions can be assigned to Roles.
+      type: object
+      properties:
+        permissionId:
+          type: integer
+          description: Unique id
+        guid:
+          type: string
+          description: unique identifier to be used in the applications to set/deny access
+        permissionName:
+          type: string
+          description: Human readable name for this permission
+        sortOn:
+          type: string
+          description: override sorting on alphabet
+        tags:
+          type: array
+          items:
+            type: string
+          description: keywords to group and search permissions
+          example:
+            - contacts
+            - selection
+        isArchive:
+          type: boolean
+        creationDate:
+          type: string
+          format: date-time
+          description: The date that the permission was created.
+        modifiedDate:
+          type: string
+          format: date-time
+          description: The date that the permission was updated.
+      required:
+        - permissionId
+        - guid
+        - permissionName
+    Role:
+      title: Role
+      type: object
+      description: >-
+        A Role is a collection of permissions and can be assigned to a team or
+        individual user
+      properties:
+        roleId:
+          type: integer
+          description: Unique Id for this Role
+        accountId:
+          type: integer
+          description: account the role belongs to
+        roleName:
+          type: string
+          description: Name of the role
+        sortOn:
+          type: string
+          description: Override alphabetical sorting on roleName
+        tags:
+          type: array
+          items:
+            type: string
+          description: keywords to group and search roles
+        teams:
+          description: Teams this role is assigned to
+          type: array
+          items:
+            type: object
+            properties:
+              teamId:
+                type: integer
+              teamName:
+                type: string
+        users:
+          description: Users this role is assigned to
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                type: integer
+              userName:
+                type: string
+        isArchive:
+          type: boolean
+          description: is this role still active. On creation it is set to TRUE
+        creationDate:
+          type: string
+          format: date-time
+          description: The date that the role was created.
+        modifiedDate:
+          type: string
+          format: date-time
+          description: The date that the role was updated.
+      required:
+        - roleId
+        - roleName
+    Account:
+      title: Account
+      type: object
+      description: A single account with license information
+      properties:
+        accountId:
+          type: integer
+        guid:
+          type: string
+          format: uuid
+          description: Unique ID for his account
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        accountName:
+          type: string
+          description: human readable id for this account
+          example: DEMO
+        sortOn:
+          type: string
+          description: Override alphabetical sorting on roleName
+        contactName:
+          type: string
+          example: Erick de Boer
+        contactEmail:
+          type: string
+          example: e.deboer@em-cultuur.nl
+        teamsInuse:
+          type: integer
+          description: Number of currently active teams
+        usersInuse:
+          type: integer
+          description: number of active users
+        mailsIn:
+          type: integer
+          description: number of mails sent in current year
+        licenses:
+          description: license array that sets max values and acquired modules
+          type: array
+          items:
+            type: object
+            properties:
+              moduleId:
+                type: integer
+                example: 1
+              moduleName:
+                type: string
+                example: Max Users
+              startDate:
+                type: string
+                format: date
+                example: '2019-08-24'
+              isActive:
+                type: boolean
+              value:
+                type: string
+                example: '3'
+        APIkeys:
+          description: available api-keys for external access
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                format: uuid
+                example: 0e04fb34-eb03-11eb-9a03-0242ac130003
+              startDate:
+                type: string
+                format: date
+                example: '2019-08-24'
+              endDate:
+                type: string
+                format: date
+                example: '2099-08-24'
+              isActive:
+                type: boolean
+              purpose:
+                type: string
+                example: external access
+        IPranges:
+          description: IP-ranges allowed/restricted fot this account
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - ALLOW
+                  - DENY
+                example: ALLOW
+              wildcard:
+                type: string
+                example: 94.168.36.42
+              startDate:
+                type: string
+                format: date
+                example: '2019-08-24'
+              endDate:
+                type: string
+                format: date
+                example: '2099-08-24'
+              isActive:
+                type: boolean
+              purpose:
+                type: string
+                example: damrak.em-cultuur.nl
+        expiryDate:
+          type: string
+          format: date
+          description: The date the account expires
+        blockStartDate:
+          type: string
+          format: date
+          example: '2020-01-01'
+          description: The date the account was blocked by EM-Office
+        blockExpiryDate:
+          type: string
+          format: date
+          example: '2029-01-01'
+          description: Date the block expires
+        blockReason:
+          type: string
+          example: Bill not paid
+          description: Reason for the block
+        creationDate:
+          type: string
+          format: date-time
+          description: The date/time that the account was created.
+        modifiedDate:
+          type: string
+          format: date-time
+          description: The date/time that the account was updated.
+      required:
+        - guid
+        - accountName
+      x-examples:
+        example-1:
+          value:
+            accountId: 0
+            guid: d290f1ee-6c54-4b01-90e6-d701748f0851
+            accountName: DEMO
+            sortOn: string
+            contactName: Erick de Boer
+            contactEmail: e.deboer@em-cultuur.nl
+            teams: 0
+            users: 0
+            mails: 0
+            license: string
+            expiryDate: '2019-08-24'
+            creationDate: '2019-08-24T14:15:22Z'
+            modifiedDate: '2019-08-24T14:15:22Z'
+  parameters:
+    searchString:
+      name: searchString
+      in: query
+      required: false
+      schema:
+        type: string
+      allowEmptyValue: true
