@@ -2,25 +2,26 @@ openapi: 3.0.0
 servers:
   - url: 'http://localhost:3000'
 info:
-  description: 'EmailZ Security API (users, teams, roles and permissions)'
+  description: 'adrez.plus Security API (users, teams, roles and permissions)'
   version: 1.0.0
-  title: Setup for EmailAdreZ API
+  title: Setup for adrez.plus API
   contact:
-    email: e.deboer@em-cultuur.nl
+    email: e.deboer@adrez.plus
     name: Erick de Boer
     url: 'https://www.em-cultuur.nl'
 tags:
-  - name: license
-    description: license administrators
-  - name: admins
-    description: Secured Admin-only calls
+  - name: accounts
+  - name: teams
+  - name: permissions
+  - name: roles
+  - name: users
 paths:
   /accounts:
     get:
       description: get a list of available accounts
       summary: search Accounts
       tags:
-        - admins
+        - accounts
       parameters:
         - in: query
           name: searchString
@@ -57,11 +58,11 @@ paths:
       operationId: getAccounts
   /account:
     post:
-      summary: Create New Account
+      summary: Create New Account/license
       operationId: createAccount
       description: Create a new Account.
       tags:
-        - license
+        - accounts
       responses:
         '200':
           description: Account Created
@@ -84,7 +85,8 @@ paths:
       summary: get a single account
       operationId: getAccount
       description: get account info and license
-      tags: []
+      tags:
+        - accounts
       responses:
         '200':
           description: Account exists
@@ -99,7 +101,7 @@ paths:
       operationId: updateAccount
       description: update account information/license settings
       tags:
-        - license
+        - accounts
       responses:
         '200':
           description: Account Updated
@@ -112,13 +114,14 @@ paths:
         delete an account, including license info. All related data wil be
         deleted.
       tags:
-        - license
+        - accounts
       responses:
         '200':
           description: You cannot delete accounts (yet)
   /teams:
     get:
-      tags: []
+      tags:
+        - teams
       summary: search Teams
       operationId: searchTeams
       description: get a list of available Teams
@@ -153,7 +156,7 @@ paths:
       operationId: createTeam
       description: Create a new team. Number of teams is restricted by the account license
       tags:
-        - admins
+        - teams
       responses:
         '200':
           description: Team Created
@@ -187,7 +190,7 @@ paths:
       summary: Update Team Information
       operationId: patchTeamTeamId
       tags:
-        - admins
+        - teams
       responses:
         '200':
           description: Team Updated
@@ -201,7 +204,7 @@ paths:
     delete:
       summary: Delete Team by team
       tags:
-        - admins
+        - teams
       responses:
         '200':
           description: Team Deleted
@@ -218,7 +221,8 @@ paths:
       summary: search Permissions
       operationId: searchPermissions
       description: 'By passing in the appropriate options, you can search for'
-      tags: []
+      tags:
+       - permissions
       parameters:
         - in: query
           name: searchString
@@ -258,7 +262,7 @@ paths:
       operationId: createPermission
       description: Post the necessary fields for the API to create a new Permission
       tags:
-        - license
+        - permissions
       responses:
         '200':
           description: Permission Created
@@ -287,7 +291,7 @@ paths:
               required:
                 - name
                 - guid
-  '/permission{permissionId}':
+  '/permission/{permissionId}':
     parameters:
       - name: permissionId
         schema:
@@ -314,7 +318,7 @@ paths:
       operationId: updatePermission
       description: Update the information of an existing permission.
       tags:
-        - license
+        - permissions
       responses:
         '200':
           description: Permission Updated
@@ -354,7 +358,7 @@ paths:
       operationId: deletePermission
       description: Delete permission also removes the permission from all roles
       tags:
-        - license
+        - permissions
       responses:
         '200':
           description: Permission Deleted
@@ -409,7 +413,7 @@ paths:
       operationId: addUser
       description: Create a new user
       tags:
-        - admins
+        - users
       responses:
         '200':
           description: User Created
@@ -517,7 +521,7 @@ paths:
     delete:
       summary: Delete user by userId
       tags:
-        - admins
+        - users
       responses:
         '200':
           description: User Deleted
@@ -574,7 +578,7 @@ paths:
       operationId: createRole
       description: Create a new user.
       tags:
-        - license
+        - roles
       responses:
         '200':
           description: Role Created
@@ -600,7 +604,7 @@ paths:
                 - name
                 - email
         description: Post the necessary fields for a new Role.
-  '/role{roleId}':
+  '/role/{roleId}':
     parameters:
       - schema:
           type: integer
@@ -627,7 +631,7 @@ paths:
       operationId: updateRoleRoleId
       description: Update the information of an existing user.
       tags:
-        - admins
+        - users
       responses:
         '200':
           description: Role Updated
@@ -671,7 +675,7 @@ paths:
       operationId: deleteRole
       description: Retrieve the information of the role by roleId
       tags:
-        - admins
+        - roles
       responses:
         '200':
           description: Role Deleted
